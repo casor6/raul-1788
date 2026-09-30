@@ -4,17 +4,27 @@ import bcrypt from 'bcrypt';
 import { repo } from '../repository/UserLocalRepository.js';
 import type { User } from '../interfaces/IUser.js';
 import { randomUUID } from 'crypto';
-import jwt from 'jsonwebtoken';
+import { signToken } from '../shared/jwt.js';
 
 const router = Router();
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const JWT_SECRET = process.env.JWT_SECRET || 'replace_with_a_secret';
 
+type RegisterBody = {
+    name: string;
+    email: string;
+    password: string;
+}
+
+type LoginBody = {
+    email: string;
+    password: string;
+}
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body ?? {};
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
+    const body = req.body as RegisterBody;
+    const { name, email, password } = body;
+    if (!name || !email || !password) {
+        return res.status(400).json({ message: 'Name, email and password are required' });
     }
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -37,7 +47,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
         id: randomUUID(),
         email: normalizedEmail,
         password: hashedPassword,
-        name: email,
+        name,
         createdAt: new Date().toISOString(),
         balance: 0,
     };
@@ -47,7 +57,8 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
 });
 
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body ?? {};
+    const body = req.body as LoginBody;
+    const { email, password } = body;
     if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
     }
@@ -60,7 +71,8 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
+
+    const token = signToken({ id: user.id, email: user.email, name: user.name });
     return res.status(200).json({ token });
 });
 

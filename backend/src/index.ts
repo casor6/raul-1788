@@ -1,5 +1,6 @@
 import express, { type Request, type Response } from 'express';
 import AuthRouter from './services/Auth.js';
+import SnailPayRouter from './services/SnailPay.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use('/auth', AuthRouter)
+app.use('/snailpay', SnailPayRouter)
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello Snail Race!');

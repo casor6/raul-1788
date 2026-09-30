@@ -33,4 +33,14 @@ export const repo: UserRepository = {
         await writeUsers(users);
         return user;
     },
+    addBalance: async (id: string, amount: number) => {
+        const users = await readUsers();
+        const user = users.find((u) => u.id === id);
+        if (!user) {
+            return null;
+        }
+        user.balance += amount;
+        await writeUsers(users);
+        return user;
+    },
 };

@@ -6,7 +6,7 @@ import { getChartTheme } from './chartTheme';
 type Props = { won: number; lost: number };
 
 export default function DoughnutChart({ won, lost }: Props) {
-    const theme = useMemo(getChartTheme, []);
+    const theme = useMemo(() => getChartTheme(), []);
 
     const data = {
         labels: ['Ganadas', 'Perdidas'],

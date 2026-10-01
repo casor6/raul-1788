@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen">
-            <Navbar userName={user?.name} balance={balance} onLogout={handleLogout} />
+            <Navbar userName={user?.name ?? 'Usuario'} balance={balance} onLogout={handleLogout} />
 
             <main className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <DoughnutChart won={mockBets.won} lost={mockBets.lost} />

@@ -35,14 +35,10 @@ export default function AddBalanceModal({ visible, setVisible }: { visible: bool
             return;
         }
         setFormError('');
-        try {
-            const response = await recharge({ amount, cardName, cardNumber: cardNumber.replaceAll(/\s|-|\//g, ''), cardExpiration, cardCVV });
-            console.log(response);
-            cleanForm();
-            setVisible(false);
-        } catch (error) {
-            setFormError(error.message);
-        }
+        const response = await recharge({ amount, cardName, cardNumber: cardNumber.replaceAll(/\s|-|\//g, ''), cardExpiration, cardCVV });
+        if (!response) return;
+        cleanForm();
+        setVisible(false);
     }
 
 
@@ -86,11 +82,11 @@ export default function AddBalanceModal({ visible, setVisible }: { visible: bool
                     <div className='flex gap-3 w-full'>
                         <div className='flex flex-1 flex-col'>
                             <label htmlFor="cardNumber" className="font-bold block mb-2">Numero de tarjeta</label>
-                            <InputMask id="cardNumber" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} placeholder='Ej. 1234 5678 9123 4567' mask='9999-9999-9999-9999' />
+                            <InputMask id="cardNumber" value={cardNumber} onChange={(e) => setCardNumber(e.target.value ?? '')} placeholder='Ej. 1234 5678 9123 4567' mask='9999-9999-9999-9999' />
                         </div>
                         <div className='flex flex-1 flex-col'>
                             <label htmlFor="cardExpiration" className="font-bold block mb-2">Fecha de expiracion</label>
-                            <InputMask id="cardExpiration" mask="99/99" variant='outlined' value={cardExpiration} onChange={(e) => setCardExpiration(e.target.value)} placeholder='Ej. 12/26' />
+                            <InputMask id="cardExpiration" mask="99/99" variant='outlined' value={cardExpiration} onChange={(e) => setCardExpiration(e.target.value ?? '')} placeholder='Ej. 12/26' />
                         </div>
                         <div className='flex flex-1 flex-col'>
                             <label htmlFor="cardCVV" className="font-bold block mb-2">CVV</label>

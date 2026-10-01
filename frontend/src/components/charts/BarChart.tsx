@@ -8,7 +8,7 @@ export type SnailWins = { name: string; wins: number };
 type Props = { snails: SnailWins[] };
 
 export default function BarChart({ snails }: Props) {
-    const theme = useMemo(getChartTheme, []);
+    const theme = useMemo(() => getChartTheme(), []);
 
     const data = {
         labels: snails.map((s) => s.name),

@@ -42,8 +42,8 @@ export default function RegisterPage() {
         try {
             await register({ name, email, password });
             navigate('/dashboard');
-        } catch (error: any) {
-            setErrors(error.message);
+        } catch (error) {
+            setErrors(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
         } finally {
             setIsSubmitting(false);
         }

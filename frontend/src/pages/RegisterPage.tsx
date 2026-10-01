@@ -4,7 +4,9 @@ import { InputText } from "primereact/inputtext"
 import { Password } from "primereact/password"
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
+import { Message } from "primereact/message";
 
 type FormValues = {
     name: string;
@@ -13,6 +15,10 @@ type FormValues = {
     confirmPassword: string;
 }
 export default function RegisterPage() {
+    const { register } = useAuth();
+    const navigate = useNavigate();
+    const [valueErrors, setErrors] = useState<string>('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,12 +32,21 @@ export default function RegisterPage() {
     const showError = (field: keyof FormValues) =>
         (touched[field] || submitted) ? errors[field] : undefined;
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSubmitted(true);
 
         if (!isValid) return;
-        console.log("Enviar al backend:", { name, email, password });
+        setIsSubmitting(true);
+        setErrors("");
+        try {
+            await register({ name, email, password });
+            navigate('/dashboard');
+        } catch (error: any) {
+            setErrors(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     function validate(values: FormValues) {
@@ -53,7 +68,8 @@ export default function RegisterPage() {
     const errors = validate({ name, email, password, confirmPassword });
     const isValid = Object.keys(errors).length === 0;
     return <main className="min-h-screen flex items-center justify-center p-4">
-        <Card title="Registro" subTitle="Ingrese sus credenciales" className="w-full max-w-md">
+        <Card title="Registro" subTitle="Ingrese sus datos para el registro" className="w-full max-w-md">
+            {valueErrors && <Message severity="error" text={valueErrors} className="w-full" />}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name">Nombre Completo</label>
@@ -90,7 +106,7 @@ export default function RegisterPage() {
                     )}
                 </div>
 
-                <Button type="submit" label="Registrarse" className="w-full" disabled={!isValid} loading={false} />
+                <Button type="submit" label="Registrarse" className="w-full" disabled={!isValid} loading={isSubmitting} />
 
                 <p className="text-center text-sm">
                     ¿Ya tienes cuenta? <Link to="/login" className="text-blue-600">Inicia Sesión</Link>

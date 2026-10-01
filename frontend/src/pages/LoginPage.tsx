@@ -4,7 +4,9 @@ import { InputText } from "primereact/inputtext"
 import { Password } from "primereact/password"
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
+import { Message } from "primereact/message";
 
 type FormValues = {
     email: string;
@@ -13,9 +15,24 @@ type FormValues = {
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [valueErrors, setErrors] = useState<string>('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        setErrors("");
+        setIsSubmitting(true);
+
+        try {
+            await login(email, password);
+            navigate('/dashboard');
+        } catch (error: any) {
+            setErrors(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     function validate(values: FormValues) {
@@ -32,6 +49,7 @@ export default function LoginPage() {
     const isValid = Object.keys(errors).length === 0;
     return <main className="min-h-screen flex items-center justify-center p-4">
         <Card title="Login" subTitle="Ingrese sus credenciales" className="w-full max-w-md">
+            {valueErrors && <Message severity="error" text={valueErrors} className="w-full" />}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Correo</label>
@@ -47,7 +65,7 @@ export default function LoginPage() {
                         className="w-full" inputClassName="w-full" pt={{ iconField: { root: { className: 'w-full' } } }} />
                 </div>
 
-                <Button type="submit" label="Entrar" className="w-full" disabled={!isValid} />
+                <Button type="submit" label="Entrar" className="w-full" disabled={!isValid} loading={isSubmitting} />
 
                 <p className="text-center text-sm">
                     ¿No tienes cuenta? <Link to="/register" className="text-blue-600">Regístrate</Link>

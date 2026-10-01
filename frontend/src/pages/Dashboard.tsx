@@ -1,9 +1,7 @@
-import { useNavigate } from 'react-router';
 import Navbar from '../components/Navbar';
 import DoughnutChart from '../components/charts/DoughnutChart';
 import BarChart, { type SnailWins } from '../components/charts/BarChart';
-
-const mockUser = { name: 'Juan Pérez', balance: 1250.5 };
+import { useAuth } from '../context/AuthContext';
 const mockBets = { won: 7, lost: 4 };
 const mockSnailWins: SnailWins[] = [
     { name: 'Turbo', wins: 2 },
@@ -15,15 +13,14 @@ const mockSnailWins: SnailWins[] = [
 ];
 
 export default function DashboardPage() {
-    const navigate = useNavigate();
-
+    const { user, logout } = useAuth();
     const handleLogout = () => {
-        navigate('/login');
+        logout();
     };
 
     return (
         <div className="min-h-screen">
-            <Navbar userName={mockUser.name} balance={mockUser.balance} onLogout={handleLogout} />
+            <Navbar userName={user?.name} balance={user?.balance} onLogout={handleLogout} />
 
             <main className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <DoughnutChart won={mockBets.won} lost={mockBets.lost} />

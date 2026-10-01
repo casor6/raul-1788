@@ -45,6 +45,7 @@ export function validateCard(input: Record<string, unknown>, now = new Date()): 
             const expiry = expYear * 12 + (expMonth - 1);
             if (expiry < current) errors.cardExpiration = 'La tarjeta está vencida';
         }
+        expYear = Number(exp[2]);
     }
 
     const cvv = typeof input.cardCVV === 'string' ? input.cardCVV.trim() : '';

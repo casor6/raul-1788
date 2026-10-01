@@ -37,11 +37,13 @@ const TEST_CARDS: Record<string, TestCard> = {
     '4242424242424242': { outcome: { approved: false, code: 'service_error' } },
 };
 
+const GATEWAY_DELAY_MS = Number(process.env.PAYMENT_DELAY_MS ?? 1000);
+
 export class MockPaymentGateway {
 
     async charge(data: PayCard): Promise<ChargeResult> {
         const { card, cvv, amount, expMonth, expYear } = data;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, GATEWAY_DELAY_MS));
 
         const testCard = TEST_CARDS[card];
         if (!testCard) {

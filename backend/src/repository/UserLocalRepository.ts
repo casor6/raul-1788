@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import type { User, UserRepository } from '../interfaces/IUser.js';
 
-const FILE = path.resolve(process.cwd(), 'data', 'users.json');
+const FILE = process.env.USERS_FILE ?? path.resolve(process.cwd(), 'data', 'users.json');
 
 async function readUsers(): Promise<User[]> {
     try {

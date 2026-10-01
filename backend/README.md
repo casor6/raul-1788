@@ -25,6 +25,8 @@ cp .env.example .env
 |--------------|---------------------------------|-----------------------------------|
 | `PORT`       | Puerto del servidor             | `3000`                            |
 | `JWT_SECRET` | Secreto para firmar los tokens  | `replace_with_a_secret`           |
+| `USERS_FILE` | Ruta del archivo de usuarios (la usan los tests) | `data/users.json`  |
+| `PAYMENT_DELAY_MS` | Retardo simulado de la pasarela, en ms (la usan los tests) | `1000` |
 
 Cómo se cargan:
 
@@ -50,6 +52,7 @@ Server is running on port http://localhost:3000
 | `npm run dev`   | Servidor en desarrollo con recarga (tsx), carga `.env` |
 | `npm run build` | Compila `src/` a `dist/` con `tsc`        |
 | `npm start`     | Ejecuta `dist/index.js` (usa las variables del entorno) |
+| `npm test`      | Corre las pruebas automatizadas con Vitest |
 
 ### Producción local
 
@@ -333,6 +336,37 @@ Notas:
 
 ---
 
+## Pruebas automatizadas
+
+Pruebas de integración con **Vitest** y **supertest**: hacen peticiones HTTP reales a la app de Express sin levantar el puerto.
+
+```bash
+npm test
+```
+
+No requieren servidor corriendo ni `.env`. Duran ~4 segundos.
+
+### Qué cubren
+
+| Archivo | Endpoint | Casos |
+|---|---|---|
+| `tests/auth.test.ts` | `POST /auth/register` | Registro válido con token y saldo 0; no expone el password; email normalizado a minúsculas y sin espacios; campos faltantes; body vacío; emails inválidos; password menor a 6 caracteres; email duplicado |
+| | `POST /auth/login` | Login válido con token que vence en 24 h; email con mayúsculas y espacios; campos faltantes; email no registrado; password incorrecta |
+| `tests/payments.test.ts` | `POST /snailpay/recharge` (autenticación) | Sin token; token mal formado; firmado con otro secreto; expirado; usuario inexistente (404) |
+| | `POST /snailpay/recharge` (datos inválidos) | Monto faltante, cero, negativo o string; cada error de tarjeta (número, nombre, formato de fecha, mes inválido, vencida, CVV); todos los errores a la vez; el saldo no cambia |
+| | `POST /snailpay/recharge` (tarjetas) | Todas las tarjetas de prueba con su código HTTP y `status_detail`; el saldo sube solo con `approved`; recargas acumuladas; número con espacios → `unknown_card` |
+
+### Cómo están aisladas
+
+- **Datos:** cada archivo de test usa su propio `users.json` temporal (`USERS_FILE`), que se borra al terminar. `data/users.json` no se toca.
+- **Pasarela:** `PAYMENT_DELAY_MS=0` quita el retardo de 1 segundo.
+- **Fecha:** los tests de pagos congelan la fecha en el 15 de junio de 2026, así que el vencimiento `12/26` de la tarjeta aprobada no los rompe con el paso del tiempo.
+- **JWT:** se usa `JWT_SECRET=test_secret`.
+
+La configuración está en `vitest.config.ts` y `tests/setup.ts`.
+
+---
+
 ## Ejemplos con curl
 
 ```bash
@@ -359,8 +393,15 @@ curl -X POST http://localhost:3000/snailpay/recharge \
 ```
 snail-race-backend/
 ├── data/users.json                 # Persistencia local de usuarios
+├── vitest.config.ts                # Configuración de las pruebas
+├── tests/
+│   ├── setup.ts                    # users.json temporal por archivo de test
+│   ├── helpers.ts                  # Crear usuario, decodificar token, leer saldo
+│   ├── auth.test.ts                # Registro y login
+│   └── payments.test.ts            # Recargas y tarjetas de prueba
 └── src/
-    ├── index.ts                    # Arranque de Express, CORS, rutas
+    ├── index.ts                    # Arranque del servidor (listen)
+    ├── app.ts                      # App de Express: CORS, JSON y rutas
     ├── services/
     │   ├── Auth.ts                 # /auth/register, /auth/login
     │   ├── SnailPay.ts             # /snailpay/recharge

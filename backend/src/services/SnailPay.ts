@@ -29,6 +29,9 @@ router.post('/recharge', async (req: Request, res: Response) => {
         res.status(400).json({ message: 'Datos de tarjeta inválidos', errors: validation.errors });
         return;
     }
+    if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     const user = await repo.findById(req.user.id);
     if (!user) {

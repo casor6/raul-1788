@@ -53,7 +53,8 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     };
 
     const newUser = await repo.create(user);
-    return res.status(201).json(newUser);
+    const token = signToken({ id: newUser.id, email: newUser.email, name: newUser.name, balance: newUser.balance });
+    return res.status(201).json({ token });
 });
 
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {

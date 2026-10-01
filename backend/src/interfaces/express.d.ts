@@ -1,4 +1,4 @@
-import type { TokenPayload } from '../utils/jwt.js';
+import type { TokenPayload } from '../shared/jwt.js';
 
 declare global {
     namespace Express {

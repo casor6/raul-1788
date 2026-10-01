@@ -5,6 +5,7 @@ type PayloadUser = {
     id: string;
     email: string;
     name: string;
+    balance: number;
 };
 
 export function signToken(user: PayloadUser): string {

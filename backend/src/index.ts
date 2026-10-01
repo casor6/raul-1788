@@ -1,10 +1,12 @@
 import express, { type Request, type Response } from 'express';
 import AuthRouter from './services/Auth.js';
 import SnailPayRouter from './services/SnailPay.js';
+import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.use('/auth', AuthRouter)

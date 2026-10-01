@@ -72,7 +72,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
         return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const token = signToken({ id: user.id, email: user.email, name: user.name });
+    const token = signToken({ id: user.id, email: user.email, name: user.name, balance: user.balance });
     return res.status(200).json({ token });
 });
 

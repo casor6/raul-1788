@@ -1,0 +1,1 @@
+export const currency = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });

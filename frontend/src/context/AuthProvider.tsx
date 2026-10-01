@@ -29,6 +29,10 @@ function loadUser(): User | null {
   return { id: payload.id, name: payload.name, email: payload.email, balance: payload.balance };
 }
 
+function loadBalance(): number {
+  return Number(localStorage.getItem('balance') ?? 0);
+}
+
 export function decodeToken(token: string): TokenPayload | null {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -41,17 +45,26 @@ export function decodeToken(token: string): TokenPayload | null {
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(loadUser);
+  const [balance, setBalance] = useState<number>(loadBalance);
 
   const saveSession = ({ token }: AuthResponse) => {
     tokenStorage.set(token);
     const payload = decodeToken(token);
     setUser(payload ? { id: payload.id, name: payload.name, email: payload.email, balance: payload.balance } : null);
+    localStorage.setItem('balance', payload?.balance.toString() ?? '0');
   };
 
   const logout = useCallback(() => {
     tokenStorage.clear();
+    localStorage.removeItem('balance');
     setUser(null);
   }, []);
+
+  const addBalance = (amount: number) => {
+    const next = Math.round((balance + amount) * 100) / 100;
+    localStorage.setItem('balance', String(next));
+    setBalance(next);
+  };
 
   useEffect(() => {
     setUnauthorizedHandler(logout);
@@ -66,7 +79,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, logout, balance, addBalance }}>
       {children}
     </AuthContext.Provider>
   );

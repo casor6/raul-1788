@@ -13,14 +13,14 @@ const mockSnailWins: SnailWins[] = [
 ];
 
 export default function DashboardPage() {
-    const { user, logout } = useAuth();
+    const { user, logout, balance } = useAuth();
     const handleLogout = () => {
         logout();
     };
 
     return (
         <div className="min-h-screen">
-            <Navbar userName={user?.name} balance={user?.balance} onLogout={handleLogout} />
+            <Navbar userName={user?.name} balance={balance} onLogout={handleLogout} />
 
             <main className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <DoughnutChart won={mockBets.won} lost={mockBets.lost} />

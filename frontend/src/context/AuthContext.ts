@@ -7,6 +7,8 @@ type AuthContextValue = {
     login: (email: string, password: string) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => void;
+    balance: number;
+    addBalance: (balance: number) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

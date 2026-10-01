@@ -3,9 +3,11 @@ const TOKEN_KEY = 'token';
 
 export class ApiError extends Error {
     status: number;
-    constructor(status: number, message: string) {
+    data: unknown;
+    constructor(status: number, message: string, data?: unknown) {
         super(message);
         this.status = status;
+        this.data = data;
     }
 }
 
@@ -33,7 +35,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     if (!response.ok) {
         const body = await response.json().catch(() => null);
         const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
-        throw new ApiError(response.status, message ?? 'Ocurrió un error inesperado');
+        throw new ApiError(response.status, message ?? 'Ocurrió un error inesperado', body);
     }
 
     if (response.status === 204) return undefined as T;

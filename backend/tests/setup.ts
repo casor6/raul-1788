@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import { afterAll } from 'vitest';
 
-const usersFile = path.join(os.tmpdir(), `snail-race-users-${randomUUID()}.json`);
+const usersFile = path.join(os.tmpdir(), `users-${randomUUID()}.json`);
 process.env.USERS_FILE = usersFile;
 
 afterAll(async () => {

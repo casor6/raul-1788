@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function Navbar({ userName, balance, onLogout }: Props) {
-    const start = <span className="text-xl font-bold">Snail Race</span>;
+    const start = <span className="text-xl font-bold">Carreras de Caracoles</span>;
     const [visible, setVisible] = useState<boolean>(false);
 
     const end = (

@@ -1,8 +1,8 @@
-# Snail Race — Frontend
+# Frontend
 
 Aplicación web en **React 19 + TypeScript + Vite**. Permite registrarse, iniciar sesión, ver un dashboard con estadísticas de apuestas y recargar saldo con tarjeta a través del backend (**SnailPay**).
 
-Consume la API de `snail-race-backend`.
+Consume la API del backend (ver [`../backend/README.md`](../backend/README.md)).
 
 ---
 
@@ -23,12 +23,12 @@ Consume la API de `snail-race-backend`.
 
 - Node.js 22 o superior
 - npm
-- Backend `snail-race-backend` corriendo
+- Backend corriendo (ver [`../backend/README.md`](../backend/README.md))
 
 ## Instalación
 
 ```bash
-cd snail-race-frontend
+cd frontend
 npm install
 cp .env.example .env
 ```
@@ -203,7 +203,7 @@ Todas pasan por `apiFetch` (`src/api/http.ts`), que agrega el token, aplica un t
 ## Estructura
 
 ```
-snail-race-frontend/
+frontend/
 └── src/
     ├── main.tsx                    # Providers (PrimeReact, Auth) y router
     ├── router.tsx                  # Definición de rutas

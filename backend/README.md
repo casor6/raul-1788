@@ -1,4 +1,4 @@
-# Snail Race — Backend
+# Backend
 
 API REST en **Node.js + Express 5 + TypeScript**. Ofrece registro e inicio de sesión con JWT, y un servicio de recarga de saldo (**SnailPay**) con una pasarela de pagos simulada.
 
@@ -14,7 +14,7 @@ Los usuarios se guardan en un archivo JSON local (`data/users.json`); no se nece
 ## Instalación
 
 ```bash
-cd snail-race-backend
+cd backend
 npm install
 cp .env.example .env
 ```
@@ -91,7 +91,7 @@ Health check.
 **Respuesta `200`** (texto plano):
 
 ```
-Hello Snail Race!
+OK
 ```
 
 ---
@@ -409,7 +409,7 @@ curl -X POST http://localhost:3000/snailpay/recharge \
 ## Estructura
 
 ```
-snail-race-backend/
+backend/
 ├── data/users.json                 # Persistencia local de usuarios
 ├── vitest.config.ts                # Configuración de las pruebas
 ├── tests/

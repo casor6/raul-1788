@@ -12,7 +12,7 @@ app.use('/auth', AuthRouter)
 app.use('/snailpay', SnailPayRouter)
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Hello Snail Race!');
+    res.send('OK');
 });
 
 export default app;

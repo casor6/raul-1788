@@ -13,6 +13,9 @@ const statusMessages: Record<PayStatusDetail, string> = {
     service_error: 'El servicio de pagos no está disponible, intenta más tarde',
 };
 
+const saveLastPayment = (payment: unknown) =>
+    localStorage.setItem('lastPayment', JSON.stringify(payment));
+
 function getErrorMessage(data: unknown): string | null {
     if (typeof data !== 'object' || data === null) return null;
 
@@ -38,7 +41,7 @@ export function useRecharge() {
         setError('');
         try {
             const res = await payRequest(data);
-            console.log(res);
+            saveLastPayment(res);
             addBalance(data.amount);
             return res;
         } catch (err) {

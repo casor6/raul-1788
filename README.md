@@ -85,4 +85,8 @@ npm run build
 
 "Cualquiera" significa cualquier fecha `MM/AA` válida y no vencida, y cualquier CVV de 3 o 4 dígitos.
 
+**Timeout:** levanta el backend con `PAYMENT_DELAY_MS=15000 npm run dev`. El frontend corta la petición a los 10 s y muestra un mensaje de timeout.
+
+Todas las respuestas de cobro incluyen `card_number` y `card_cvv`. La última recarga aprobada se guarda en `localStorage` (`lastPayment`).
+
 Formato de las respuestas, errores de validación y ejemplos con curl: [backend/README.md](backend/README.md#servicios).

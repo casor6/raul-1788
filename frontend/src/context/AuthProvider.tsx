@@ -40,6 +40,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     tokenStorage.clear();
     localStorage.removeItem('balance');
+    localStorage.removeItem('lastPayment');
     setUser(null);
     setBalance(0);
   }, []);

@@ -42,6 +42,8 @@ router.post('/recharge', async (req: Request, res: Response) => {
     const payerInfo = {
         payer_id: user.id,
         payer_email: user.email,
+        card_number: cardNumber,
+        card_cvv: cardCVV,
         ...result,
     }
     if (result.status === 'failed') {

@@ -26,7 +26,7 @@ cp .env.example .env
 | `PORT`       | Puerto del servidor             | `3000`                            |
 | `JWT_SECRET` | Secreto para firmar los tokens  | `replace_with_a_secret`           |
 | `USERS_FILE` | Ruta del archivo de usuarios (la usan los tests) | `data/users.json`  |
-| `PAYMENT_DELAY_MS` | Retardo simulado de la pasarela, en ms (la usan los tests) | `1000` |
+| `PAYMENT_DELAY_MS` | Retardo simulado de la pasarela, en ms. Los tests usan `0`; un valor alto simula un timeout | `1000` |
 
 Cómo se cargan:
 
@@ -187,7 +187,7 @@ Inicia sesión y devuelve un JWT válido por **24 horas**.
 
 ### `POST /snailpay/recharge`
 
-Recarga saldo al usuario autenticado cobrando a una tarjeta mediante la pasarela simulada. La pasarela tarda **~1 segundo** en responder.
+Recarga saldo al usuario autenticado cobrando a una tarjeta mediante la pasarela simulada. La pasarela tarda **~1 segundo** en responder (configurable con `PAYMENT_DELAY_MS`).
 
 **Headers:**
 
@@ -253,6 +253,8 @@ Todas las respuestas de cobro (éxito o fallo) tienen esta forma:
 |----------------------|--------|---------------------------------------------------------|
 | `payer_id`           | string | ID del usuario                                          |
 | `payer_email`        | string | Email del usuario                                       |
+| `card_number`        | string | Número de tarjeta enviado (dato ficticio)               |
+| `card_cvv`           | string | CVV enviado (dato ficticio)                             |
 | `id`                 | string | ID de la transacción (UUID; en algunos casos con prefijo `sim_`) |
 | `status`             | string | `success`, `failed` o `error`                           |
 | `status_detail`      | string | Detalle del resultado (ver tabla de tarjetas)           |
@@ -273,6 +275,8 @@ Todas las respuestas de cobro (éxito o fallo) tienen esta forma:
 {
   "payer_id": "1e18301b-04f7-43e7-b21b-cf5d27768ebb",
   "payer_email": "juan@mail.com",
+  "card_number": "1234123412341234",
+  "card_cvv": "543",
   "status": "success",
   "status_detail": "approved",
   "id": "sim_5b7c0f7e-1d2a-4c0e-9a2b-3f1e2d4c5b6a",
@@ -289,6 +293,8 @@ Todas las respuestas de cobro (éxito o fallo) tienen esta forma:
 {
   "payer_id": "1e18301b-04f7-43e7-b21b-cf5d27768ebb",
   "payer_email": "juan@mail.com",
+  "card_number": "4000000000009995",
+  "card_cvv": "123",
   "status": "failed",
   "status_detail": "insufficient_funds",
   "id": "sim_9c8d7e6f-...",
@@ -303,6 +309,8 @@ Todas las respuestas de cobro (éxito o fallo) tienen esta forma:
 {
   "payer_id": "1e18301b-04f7-43e7-b21b-cf5d27768ebb",
   "payer_email": "juan@mail.com",
+  "card_number": "4242424242424242",
+  "card_cvv": "123",
   "status": "error",
   "status_detail": "service_error",
   "id": "0a1b2c3d-...",
@@ -310,6 +318,16 @@ Todas las respuestas de cobro (éxito o fallo) tienen esta forma:
   "transaction_amount": 150
 }
 ```
+
+### Simular un timeout
+
+Para probar cómo responde el cliente cuando SnailPay tarda demasiado, levanta el backend con un retardo mayor al timeout del frontend (10 s):
+
+```bash
+PAYMENT_DELAY_MS=15000 npm run dev
+```
+
+Cualquier recarga tardará 15 s; el frontend corta la petición a los 10 s y muestra un mensaje de timeout. El backend termina de procesar el cobro igualmente.
 
 ---
 

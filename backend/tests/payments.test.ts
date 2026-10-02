@@ -141,6 +141,8 @@ describe('POST /snailpay/recharge - test cards', () => {
         expect(response.body).toEqual({
             payer_id: expect.any(String),
             payer_email: user.email,
+            card_number: '1234123412341234',
+            card_cvv: '543',
             id: expect.stringMatching(/^sim_/),
             status: 'success',
             status_detail: 'approved',

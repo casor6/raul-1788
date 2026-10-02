@@ -28,7 +28,15 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     if (options.body) headers.set('Content-Type', 'application/json');
     if (token) headers.set('Authorization', `Bearer ${token}`);
 
-    const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+    let response: Response;
+    try {
+        response = await fetch(`${API_URL}${path}`, { ...options, headers, signal: options.signal ?? AbortSignal.timeout(10000) });
+    } catch (error) {
+        if (error instanceof DOMException && error.name === 'TimeoutError') {
+            throw new ApiError(0, 'El servidor tardó demasiado en responder, intenta de nuevo');
+        }
+        throw new ApiError(0, 'No se pudo conectar con el servidor');
+    }
 
     if (response.status === 401 && token) onUnauthorized?.();
 

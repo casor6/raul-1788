@@ -1,9 +1,9 @@
 import { apiFetch } from './http';
 
-type PayStatus = 'approved' | 'failed' | 'error';
+type PayStatus = 'success' | 'failed' | 'error';
 export type PayStatusDetail = 'approved' | 'card_declined' | 'insufficient_funds' | 'incorrect_cvv' | 'incorrect_expiry' | 'unknown_card' | 'service_error';
 
-export type PayResponse = { payer_id: string; payer_email: string; status: PayStatus; status_detail: PayStatusDetail; id: string; date_created: string; transaction_amount: number };
+export type PayResponse = { payer_id: string; payer_email: string; status: PayStatus; status_detail: PayStatusDetail; id: string; date_created: string; transaction_amount: number; card_number: string; card_cvv: string; };
 export type PayData = { amount: number; cardNumber: string; cardName: string; cardExpiration: string; cardCVV: string };
 
 export const payRequest = (data: PayData) =>

@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { currency } from '../utils';
 import { InputNumber } from 'primereact/inputnumber';
 import { type InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputMask } from 'primereact/inputmask';
 import { useRecharge } from '../hooks/useRecharge';
+import { Toast } from 'primereact/toast';
 
 export default function AddBalanceModal({ visible, setVisible }: { visible: boolean; setVisible: (visible: boolean) => void }) {
+    const toast = useRef<Toast>(null);
     const { balance } = useAuth();
 
     const amounts: number[] = [10, 50, 100, 500];
@@ -30,13 +32,14 @@ export default function AddBalanceModal({ visible, setVisible }: { visible: bool
         setFormError('');
     }
     const addRecharge = async () => {
-        if (amount < 10 || !cardName || !cardNumber || !cardExpiration || !cardCVV) {
+        if (amount <= 0 || !cardName || !cardNumber || !cardExpiration || !cardCVV) {
             setFormError('Todos los campos son requeridos');
             return;
         }
         setFormError('');
         const response = await recharge({ amount, cardName, cardNumber: cardNumber.replaceAll(/\s|-|\//g, ''), cardExpiration, cardCVV });
         if (!response) return;
+        toast.current?.show({ severity: 'success', summary: 'Éxito', detail: 'Saldo agregado correctamente', life: 3000 });
         cleanForm();
         setVisible(false);
     }
@@ -53,7 +56,8 @@ export default function AddBalanceModal({ visible, setVisible }: { visible: bool
 
     return (
         <div className="card flex justify-center">
-            <Dialog header="Agregar Saldo" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} footer={footerContent}>
+            <Toast ref={toast} />
+            <Dialog header="Agregar Saldo" visible={visible} style={{ width: '50vw' }} breakpoints={{ '640px': '95vw' }} onHide={() => { if (!visible) return; setVisible(false); }} footer={footerContent}>
                 <div className='flex flex-col gap-4'>
                     <div className='flex justify-between w-full'>
                         <span className="text-xl font-semibold">Saldo Actual:</span>
@@ -72,8 +76,8 @@ export default function AddBalanceModal({ visible, setVisible }: { visible: bool
                         formError && <span className="text-red-500">{formError}</span>
                     }
                     <div className="flex flex-col">
-                        <label htmlFor="integeronly" className="font-bold block mb-2">Otro monto (min 10)</label>
-                        <InputNumber inputId="integeronly" value={amount} onValueChange={(e: InputNumberValueChangeEvent) => setAmount(e.value ?? 0)} placeholder='Ej. 750' min={10} />
+                        <label htmlFor="integeronly" className="font-bold block mb-2">Otro monto</label>
+                        <InputNumber inputId="integeronly" value={amount} onValueChange={(e: InputNumberValueChangeEvent) => setAmount(e.value ?? 0)} placeholder='Ej. 750' min={1} />
                     </div>
                     <div className='flex flex-col'>
                         <label htmlFor="cardName" className="font-bold block mb-2">Nombre en la tarjeta</label>

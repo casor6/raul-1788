@@ -107,10 +107,11 @@ Envía `POST /auth/login`. Si responde bien, guarda la sesión y entra a `/dashb
 
 - El JWT se guarda en `localStorage` con la clave `token`. Nombre, email y saldo se obtienen decodificando el token en el navegador.
 - El saldo mostrado se guarda en `localStorage` con la clave `balance`.
+- La última recarga **aprobada** se guarda en `localStorage` con la clave `lastPayment`: la respuesta completa de SnailPay, incluidos `card_number` y `card_cvv` (siempre datos ficticios). Las recargas rechazadas no se guardan.
 - Al cargar la app, si el token ya expiró (24 h), se borra y se pide iniciar sesión de nuevo.
 - Todas las peticiones envían `Authorization: Bearer <token>`.
 - Si el backend responde `401` a una petición que llevaba token, se cierra la sesión automáticamente.
-- **Salir** borra `token` y `balance` del `localStorage`.
+- **Salir** borra `token`, `balance` y `lastPayment` del `localStorage`.
 
 ### Dashboard (`/dashboard`)
 
@@ -126,16 +127,16 @@ Se abre con **Agregar Saldo** en la barra superior.
 
 | Campo                 | Entrada                                   | Se envía como       |
 |-----------------------|-------------------------------------------|---------------------|
-| Monto                 | Botones rápidos $10, $50, $100, $500, o monto libre (mínimo 10) | `amount` |
+| Monto                 | Botones rápidos $10, $50, $100, $500, o monto libre (entero, mínimo 1) | `amount` |
 | Nombre en la tarjeta  | Texto libre                               | `cardName`          |
 | Número de tarjeta     | Máscara `9999-9999-9999-9999`             | `cardNumber` (sin guiones ni espacios) |
 | Fecha de expiración   | Máscara `MM/AA`                           | `cardExpiration`    |
 | CVV                   | Hasta 4 caracteres                        | `cardCVV`           |
 
-- Todos los campos son obligatorios y el monto mínimo es 10. Si falta algo, muestra `Todos los campos son requeridos`.
+- Todos los campos son obligatorios y el monto debe ser mayor a 0. Si falta algo, muestra `Todos los campos son requeridos`.
 - Envía `POST /snailpay/recharge`. La pasarela simulada tarda ~1 s; mientras tanto el botón **Agregar** muestra un indicador de carga.
-- **Si el pago se aprueba:** suma el monto al saldo mostrado, limpia el formulario y cierra el modal.
-- **Si falla:** el modal sigue abierto y muestra el mensaje de error.
+- **Si el pago se aprueba:** suma el monto al saldo mostrado, guarda la respuesta en `lastPayment`, limpia el formulario, cierra el modal y muestra un aviso (toast) `Éxito — Saldo agregado correctamente`.
+- **Si falla:** el modal sigue abierto, muestra el mensaje de error y el saldo no cambia.
 
 Mensajes de error:
 
@@ -148,6 +149,21 @@ Mensajes de error:
 | `incorrect_expiry`                        | La fecha de expiración es incorrecta                         |
 | `unknown_card`                            | Tarjeta no reconocida                                        |
 | `service_error`                           | El servicio de pagos no está disponible, intenta más tarde   |
+| Sin respuesta en 10 s (timeout)           | El servidor tardó demasiado en responder, intenta de nuevo   |
+| Backend caído o sin red                   | No se pudo conectar con el servidor                          |
+
+### Timeout
+
+Todas las peticiones a la API se cancelan si no responden en **10 segundos**. Para reproducirlo, levanta el backend con un retardo mayor:
+
+```bash
+cd ../backend
+PAYMENT_DELAY_MS=15000 npm run dev
+```
+
+y haz una recarga: a los 10 s aparece el mensaje de timeout.
+
+> El timeout solo cancela la espera en el navegador. Si la tarjeta era válida, el backend termina el cobro y suma el saldo; el saldo mostrado se corrige al volver a iniciar sesión.
 
 ---
 
@@ -157,7 +173,7 @@ Se capturan en el modal tal cual; la máscara agrega los guiones y el frontend l
 
 | Número de tarjeta     | CVV        | Vencimiento | Resultado en pantalla                                     |
 |-----------------------|------------|-------------|-----------------------------------------------------------|
-| `1234-1234-1234-1234` | `543`      | `12/26`     | Pago aprobado: se suma el saldo y se cierra el modal       |
+| `1234-1234-1234-1234` | `543`      | `12/26`     | Pago aprobado: se suma el saldo, se cierra el modal y aparece el aviso de éxito |
 | `1234-1234-1234-1234` | otro       | `12/26`     | El CVV es incorrecto                                      |
 | `1234-1234-1234-1234` | `543`      | otro        | La fecha de expiración es incorrecta                      |
 | `4000-0000-0000-0002` | cualquiera | cualquiera* | La tarjeta fue rechazada                                  |
@@ -180,7 +196,7 @@ Se capturan en el modal tal cual; la máscara agrega los guiones y el frontend l
 | POST   | `/auth/login`        | `src/api/authService.ts` |
 | POST   | `/snailpay/recharge` | `src/api/paymentService.ts` |
 
-Todas pasan por `apiFetch` (`src/api/http.ts`), que agrega el token, convierte las respuestas no exitosas en `ApiError` (con `status`, `message` y el cuerpo en `data`) y cierra la sesión ante un `401`.
+Todas pasan por `apiFetch` (`src/api/http.ts`), que agrega el token, aplica un timeout de 10 s, convierte las respuestas no exitosas y los errores de red en `ApiError` (con `status`, `message` y el cuerpo en `data`) y cierra la sesión ante un `401`.
 
 ---
 
